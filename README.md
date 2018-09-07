@@ -11,6 +11,10 @@ Useful links:
 * http://replaygain.hydrogenaud.io/proposal/calculating_rg.html
 * http://wiki.hydrogenaud.io/index.php?title=ReplayGain_specification
 
+You can open the `normalizer.html` file in the browser and see the algorithm in action.
+With Firefox you can just double click the html file, but Chrome needs an http server,
+because it forbids fetch on the `file://` protocol.
+
 ## License
 
 This is licensed under the terms of the MIT license and the Apache License (Version 2.0), at your option.
