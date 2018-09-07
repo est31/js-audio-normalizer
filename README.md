@@ -1,7 +1,15 @@
 # Js normalizer
 
 This is a simple implementation of audio level normalization in Javascript.
-It bases partially on the ReplayGain algorithm.
+Such normalization is useful if you are listening to recordings with hugely different loudness levels
+and want to have them all keep the same level.
+
+It bases partially on the ReplayGain algorithm, but doesn't implement it fully.
+
+Useful links:
+
+* http://replaygain.hydrogenaud.io/proposal/calculating_rg.html
+* http://wiki.hydrogenaud.io/index.php?title=ReplayGain_specification
 
 ## License
 
