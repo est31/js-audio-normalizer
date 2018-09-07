@@ -1,0 +1,169 @@
+<script type="text/javascript">
+
+var audioCtx = new AudioContext();
+
+// http://wiki.hydrogenaud.io/index.php?title=ReplayGain_specification
+// TODO: do the loudness filtering (Butterworth, Yulewalk) IIR filters
+
+function normalizedAudioElement(name) {
+	var audioElem = document.getElementById(name + "-n");
+	var src = audioCtx.createMediaElementSource(audioElem);
+	var gainNode = audioCtx.createGain();
+	gainNode.gain.value = 1.0;
+
+	audioElem.addEventListener("play", function() {
+		src.connect(gainNode);
+		gainNode.connect(audioCtx.destination);
+	}, true);
+	audioElem.addEventListener("pause", function() {
+		// disconnect the nodes on pause, otherwise all nodes always run
+		src.disconnect(gainNode);
+		gainNode.disconnect(audioCtx.destination);
+	}, true);
+	fetch(name + ".mp3")
+		.then(function(res) { return res.arrayBuffer(); })
+		.then(function(buf) {
+			return audioCtx.decodeAudioData(buf);
+		}).then(function(decodedData) {
+			var decodedBuffer = decodedData.getChannelData(0);
+			var sliceLen = Math.floor(decodedData.sampleRate * 0.05);
+			var averages = [];
+			var sum = 0.0;
+			for (var i = 0; i < decodedBuffer.length; i++) {
+				sum += decodedBuffer[i] ** 2;
+				if (i % sliceLen === 0) {
+					sum = Math.sqrt(sum / sliceLen);
+					averages.push(sum);
+					sum = 0;
+				}
+			}
+			// Ascending sort of the averages array
+			averages.sort(function(a, b) { return a - b; });
+			// Take the average at the 95th percentile
+			var a = averages[Math.floor(averages.length * 0.95)];
+
+			var gain = 1.0 / a;
+			// Perform some clamping
+			// gain = Math.max(gain, 0.02);
+			// gain = Math.min(gain, 100.0);
+
+			// ReplayGain uses pink noise for this one one but we just take
+			// some arbitrary value... we're no standard
+			// Important is only that we don't output on levels
+			// too different from other websites
+			gain = gain / 10.0;
+			console.log("gain determined", name, a, gain);
+			gainNode.gain.value = gain;
+			var gainTextElem = document.getElementById(name + "-d");
+			gainTextElem.textContent = gain.toPrecision(4);
+		});
+}
+</script>
+<table>
+
+<tr>
+<th>
+Not normalized
+</th>
+<th>
+Normalized
+</th>
+<th>
+Computed gain
+</th>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-a.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-a-n" controls> <source src="sample-a.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-a-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-b.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-b-n" controls> <source src="sample-b.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-b-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-c.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-c-n" controls> <source src="sample-c.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-c-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-d.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-d-n" controls> <source src="sample-d.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-d-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-e.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-e-n" controls> <source src="sample-e.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-e-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-f.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-f-n" controls> <source src="sample-f.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-f-d"></div>
+</td>
+</tr>
+
+<tr>
+<td>
+<audio controls> <source src="sample-g.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<audio id="sample-g-n" controls> <source src="sample-g.mp3" type="audio/mpeg">Audio element not supported</audio>
+</td>
+<td>
+<div id="sample-g-d"></div>
+</td>
+</tr>
+
+</table>
+<script type="text/javascript">
+normalizedAudioElement("sample-a");
+normalizedAudioElement("sample-b");
+normalizedAudioElement("sample-c");
+normalizedAudioElement("sample-d");
+normalizedAudioElement("sample-e");
+normalizedAudioElement("sample-f");
+normalizedAudioElement("sample-g");
+</script>
