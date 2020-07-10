@@ -12,8 +12,7 @@ Useful links:
 * http://wiki.hydrogenaud.io/index.php?title=ReplayGain_specification
 
 You can open the `normalizer.html` file in the browser and see the algorithm in action.
-With Firefox you can just double click the html file, but Chrome needs an http server,
-because it forbids fetch on the `file://` protocol.
+You'll need a local http server most likely as most browsers forbid fetch on the `file://` protocol.
 
 ## License
 
